@@ -793,9 +793,10 @@ function NutritionTracker() {
       setError(t("messages.errorExporting"));
     }
   };
+  const patientsListSafe = Array.isArray(patientsList) ? patientsList : [];
 
   // Filter patients based on search query and update last_day for current patient
-  const filteredPatientsList = patientsList
+  const filteredPatientsList = patientsListSafe
     .map((patient) => {
       // If this is the current patient being edited, update last_day with the current day value
       if (
