@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const api = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api',
+    baseURL: process.env.REACT_APP_API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -36,7 +36,7 @@ api.interceptors.response.use(
                 const refreshToken = localStorage.getItem('refresh_token');
                 if (refreshToken) {
                     const response = await axios.post(
-                        'http://127.0.0.1:8000/api/accounts/token/refresh/',
+                        `${process.env.REACT_APP_API_URL}/accounts/token/refresh/`,
                         { refresh: refreshToken }
                     );
                     const { access } = response.data;
