@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { rampData } from '../../data/nutritionProducts';
-import { formatNum } from '../../utils/calculations';
+import { formatNum, safeParseFloat } from '../../utils/calculations';
 
 // Register Chart.js components
 ChartJS.register(
@@ -31,9 +31,9 @@ function RampGraph({ patientData, calculations, isDarkMode }) {
     const { t } = useLanguage();
     const hasCal = patientData?.calorimeter === 'ÁNO';
     const day = parseInt(patientData?.day) || 1;
-    const fullGoalKcal = parseFloat(calculations?.full_goal_kcal) || 0;
-    const totalKcal = parseFloat(calculations?.total_kcal) || 0;
-    const recGoalKcal = parseFloat(calculations?.rec_goal_kcal) || 0;
+    const fullGoalKcal = safeParseFloat(calculations?.full_goal_kcal, 0);
+    const totalKcal = safeParseFloat(calculations?.total_kcal, 0);
+    const recGoalKcal = safeParseFloat(calculations?.rec_goal_kcal, 0);
 
     // Get ramp curve data
     const curve = hasCal ? rampData.IC : rampData.PR;

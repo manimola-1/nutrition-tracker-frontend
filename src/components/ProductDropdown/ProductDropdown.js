@@ -14,7 +14,7 @@ export default function ProductDropdown({ value, onChange }) {
   const [filter, setFilter] = useState("");
   const [pos, setPos] = useState(null);
   const [favorites, setFavorites] = useState(
-    JSON.parse(localStorage.getItem(LS_KEY) || "[]")
+    JSON.parse(localStorage.getItem(LS_KEY) || "[]"),
   );
 
   /* ---------- open dropdown ---------- */
@@ -49,7 +49,7 @@ export default function ProductDropdown({ value, onChange }) {
   const toggleFavorite = (name, e) => {
     e.stopPropagation();
     const updated = favorites.includes(name)
-      ? favorites.filter(f => f !== name)
+      ? favorites.filter((f) => f !== name)
       : [...favorites, name];
 
     setFavorites(updated);
@@ -65,23 +65,23 @@ export default function ProductDropdown({ value, onChange }) {
 
   /* ---------- filtering logic (same as JS) ---------- */
   const lower = filter.toLowerCase();
-  const all = nutritionProducts.map(p => ({ name: p.name, type: p.type }));
+  const all = nutritionProducts.map((p) => ({ name: p.name, type: p.type }));
 
-  const matchingFixed = FIXED.filter(n => n.toLowerCase().includes(lower));
+  const matchingFixed = FIXED.filter((n) => n.toLowerCase().includes(lower));
   const matchingFavorites = favorites
-    .filter(n => n.toLowerCase().includes(lower))
+    .filter((n) => n.toLowerCase().includes(lower))
     .sort((a, b) => a.localeCompare(b));
 
   const getGroupItems = (group) =>
     all
       .filter(
-        p =>
+        (p) =>
           p.type === group &&
           !favorites.includes(p.name) &&
           !FIXED.includes(p.name) &&
-          p.name.toLowerCase().includes(lower)
+          p.name.toLowerCase().includes(lower),
       )
-      .map(p => p.name)
+      .map((p) => p.name)
       .sort((a, b) => a.localeCompare(b));
 
   /* ---------- dropdown UI ---------- */
@@ -100,7 +100,7 @@ export default function ProductDropdown({ value, onChange }) {
       />
 
       <div>
-        {matchingFixed.map(name => (
+        {matchingFixed.map((name) => (
           <Item key={name} name={name} onSelect={selectItem} />
         ))}
 
@@ -108,7 +108,7 @@ export default function ProductDropdown({ value, onChange }) {
           <>
             <hr />
             <Header text="Obľúbené" />
-            {matchingFavorites.map(name => (
+            {matchingFavorites.map((name) => (
               <Item
                 key={name}
                 name={name}
@@ -120,14 +120,14 @@ export default function ProductDropdown({ value, onChange }) {
           </>
         )}
 
-        {GROUPS.map(group => {
+        {GROUPS.map((group) => {
           const items = getGroupItems(group);
           if (!items.length) return null;
           return (
             <React.Fragment key={group}>
               <hr />
               <Header text={group} />
-              {items.map(name => (
+              {items.map((name) => (
                 <Item
                   key={name}
                   name={name}
@@ -144,18 +144,30 @@ export default function ProductDropdown({ value, onChange }) {
   );
 
   return (
-    <>
+    <div className="w-full min-w-0 max-w-full relative">
       <input
         ref={inputRef}
         value={value || ""}
         readOnly
         onClick={showDropdown}
         placeholder="Vyberte prípravok"
-        className="w-auto min-w-0 border border-gray-300 dark:border-gray-600 px-3 py-2 rounded-md cursor-pointer bg-white dark:bg-gray-800 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
+        className="w-full min-w-0 max-w-full box-border border border-gray-300 dark:border-gray-600 pl-2 sm:pl-3 pr-8 py-1.5 sm:py-2 rounded-md cursor-pointer bg-inherit dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 text-xs sm:text-sm truncate"
       />
-
+      <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 dark:text-gray-400">
+        <svg
+          className="w-4 h-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </span>
       {createPortal(dropdown, document.body)}
-    </>
+    </div>
   );
 }
 
@@ -177,9 +189,7 @@ function Item({ name, onSelect, fav, onStar }) {
     >
       <span>{name}</span>
       {onStar && (
-        <span onClick={(e) => onStar(name, e)}>
-          {fav ? "★" : "☆"}
-        </span>
+        <span onClick={(e) => onStar(name, e)}>{fav ? "★" : "☆"}</span>
       )}
     </div>
   );
