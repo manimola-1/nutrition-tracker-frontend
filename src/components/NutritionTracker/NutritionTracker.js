@@ -642,9 +642,15 @@ function NutritionTracker() {
       // Check if patient exists, if not create it
       let patient;
       const existingPatients = await patientsAPI.getAll();
-      const existingPatient = (
-        existingPatients.results || existingPatients
-      ).find((p) => p.patient_id === patientData.patient_id);
+      const patientsArray = Array.isArray(existingPatients?.results)
+        ? existingPatients.results
+        : Array.isArray(existingPatients)
+        ? existingPatients
+        : [];
+
+        const existingPatient = patientsArray.find(
+        (p) => p.patient_id === patientData.patient_id
+        );
 
       if (existingPatient) {
         patient = existingPatient;
