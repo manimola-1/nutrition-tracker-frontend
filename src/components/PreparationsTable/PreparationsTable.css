@@ -1,0 +1,141 @@
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+body.dark-mode table {
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+th {
+    background: #007bff;
+    color: white;
+    padding: 12px;
+    text-align: center;
+}
+
+body.dark-mode th {
+    background: #0056b3;
+    color: #fff;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+body.dark-mode td {
+    border-bottom: 1px solid #444;
+}
+
+tr:hover {
+    background: #f1f8ff;
+}
+
+body.dark-mode tr:hover {
+    background: #2c2c2c;
+}
+
+tr.auto {
+    background: #e9f7ef !important;
+}
+
+body.dark-mode tr.auto {
+    background: #2a2a2a !important;
+}
+
+.totals {
+    background: #e3f2fd !important;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+body.dark-mode .totals {
+    background: #333 !important;
+}
+
+input[type="checkbox"] {
+    width: auto;
+    transform: scale(1.4);
+}
+
+.speed,
+.hours {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.speed.auto-input {
+    background: #e9f7ef;
+    font-weight: bold;
+}
+
+body.dark-mode .speed,
+body.dark-mode .hours {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .speed.auto-input {
+    background: #2a2a2a;
+}
+
+.remove-btn {
+    background: #dc3545;
+    color: white;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.remove-btn:hover {
+    background: #c82333;
+}
+
+body.dark-mode .remove-btn {
+    background: #dc3545;
+}
+
+body.dark-mode .remove-btn:hover {
+    background: #c82333;
+}
+
+.deficit {
+    color: #d63031;
+    font-weight: bold;
+}
+
+body.dark-mode .deficit {
+    color: #ff6b6b;
+}
+
+.optimal {
+    color: #00b894;
+    font-weight: bold;
+}
+
+body.dark-mode .optimal {
+    color: #00e676;
+}
+
+.excess {
+    color: #e67e22;
+    font-weight: bold;
+}
+
+body.dark-mode .excess {
+    color: #ffb74d;
+}

@@ -1,0 +1,27 @@
+.patients-list,
+.patient-history {
+    margin-top: 20px;
+}
+
+.patient-history h3 {
+    margin-bottom: 15px;
+}
+
+.cumulative-summary {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+body.dark-mode .cumulative-summary {
+    background: #2a2a2a;
+}
+
+.cumulative-summary h4 {
+    margin-top: 0;
+}
+
+.cumulative-summary p {
+    margin: 8px 0;
+}

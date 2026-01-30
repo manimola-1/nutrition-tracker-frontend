@@ -1,0 +1,27 @@
+.dark-mode-toggle-container {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.dark-mode-toggle {
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.dark-mode-toggle:hover {
+    background: #121212;
+}
+
+body.dark-mode .dark-mode-toggle {
+    background: #121212;
+}
+
+body.dark-mode .dark-mode-toggle:hover {
+    background: #121212;
+}

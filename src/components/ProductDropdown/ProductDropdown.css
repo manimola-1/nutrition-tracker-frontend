@@ -1,0 +1,129 @@
+.product-dropdown-wrapper {
+    position: relative;
+}
+
+.product-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    cursor: pointer;
+}
+
+.product-input:hover {
+    border-color: #007bff;
+}
+
+.product-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.15);
+}
+
+body.dark-mode .product-input {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+body.dark-mode .product-input:hover {
+    border-color: #007bff;
+}
+
+body.dark-mode .product-input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.3);
+}
+
+.custom-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    margin-top: 2px;
+}
+
+.custom-dropdown.dark-mode {
+    background: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+.dropdown-search {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-bottom: 1px solid #ddd;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.custom-dropdown.dark-mode .dropdown-search {
+    background: #333;
+    color: #e0e0e0;
+    border-bottom-color: #555;
+}
+
+.dropdown-content {
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.custom-dropdown .header {
+    font-weight: bold;
+    padding: 8px;
+    background: #f8f9fa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.custom-dropdown.dark-mode .header {
+    background: #444;
+}
+
+.custom-dropdown .item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    cursor: pointer;
+    align-items: center;
+}
+
+.custom-dropdown .item:hover {
+    background: #f1f8ff;
+}
+
+.custom-dropdown.dark-mode .item:hover {
+    background: #2c2c2c;
+}
+
+.custom-dropdown .item span:first-child {
+    flex: 1;
+}
+
+.custom-dropdown .star {
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 18px;
+    user-select: none;
+}
+
+.highlight {
+    background-color: yellow;
+    color: black;
+}
+
+body.dark-mode .highlight {
+    background-color: #ffff00;
+    color: black;
+}

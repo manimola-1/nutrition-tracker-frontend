@@ -1,0 +1,10 @@
+.info {
+    font-style: italic;
+    color: #666;
+    text-align: center;
+    margin-top: 10px;
+}
+
+body.dark-mode .info {
+    color: #bbb;
+}
