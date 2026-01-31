@@ -62,12 +62,20 @@ api.interceptors.response.use(
 export const authAPI = {
     register: async (userData) => {
         const response = await api.post('/accounts/register/', userData);
-        return response.data;
+        const data = response.data;
+        // Normalize: backend returns { user, tokens: { access, refresh }, message }
+        const access = data.access ?? data.tokens?.access;
+        const refresh = data.refresh ?? data.tokens?.refresh;
+        return { ...data, access, refresh };
     },
 
     login: async (credentials) => {
         const response = await api.post('/accounts/login/', credentials);
-        return response.data;
+        const data = response.data;
+        // Persist tokens immediately so they survive page refresh
+        if (data.access) localStorage.setItem('access_token', data.access);
+        if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+        return data;
     },
 
     logout: async () => {
