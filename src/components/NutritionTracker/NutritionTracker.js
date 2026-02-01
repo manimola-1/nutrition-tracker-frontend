@@ -430,6 +430,7 @@ function NutritionTracker() {
   };
 
   const handleNewPatient = () => {
+    setShowPatientList(false);
     setPatientData({
       patient_id: "",
       height: "",
@@ -449,10 +450,6 @@ function NutritionTracker() {
   };
 
   const handleListPatients = async () => {
-    if (showPatientList) {
-      setShowPatientList(false);
-      return;
-    }
     setShowPatientList(true);
     setLoadingPatients(true);
     setError(null);
