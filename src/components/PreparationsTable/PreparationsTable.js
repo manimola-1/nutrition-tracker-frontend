@@ -104,7 +104,7 @@ function PreparationsTable({
                     Počet hodín
                   </th>
                   <th className="bg-blue-600 dark:bg-blue-700 text-white font-semibold tracking-wide p-1.5 sm:p-2 md:p-2.5 text-center text-[10px] sm:text-xs md:text-sm whitespace-normal break-words min-w-[90px] md:min-w-0 md:w-[10%]">
-                    ml (per specified hours)
+                    ml (za zadané hodiny)
                   </th>
                   <th className="bg-blue-600 dark:bg-blue-700 text-white font-semibold tracking-wide p-1.5 sm:p-2 md:p-2.5 text-center text-[10px] sm:text-xs md:text-sm whitespace-nowrap md:whitespace-normal break-words min-w-[50px] md:min-w-0 md:w-[7%]">
                     kcal

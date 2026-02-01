@@ -5,6 +5,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 function PatientHistory({
   patientsList,
   patientHistory,
+  currentPatient = null,
   loadingPatients = false,
   loadingHistory = false,
   searchQuery = "",
@@ -144,9 +145,32 @@ function PatientHistory({
     </div>
   );
 
+  const renderPatientsListEmpty = () => (
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-200/50 dark:border-gray-700/50 shadow-2xl p-5 sm:p-6 mb-6 sm:mb-8">
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-3">
+          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span className="tracking-wide">ZOZNAM PACIENTOV</span>
+        </div>
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+          História pacientov
+        </h2>
+      </div>
+      <div className="py-12 text-center">
+        <p className="text-lg text-gray-600 dark:text-gray-400 font-medium">
+          {t("patientHistory.listEmpty", "Zoznam je prázdny")}
+        </p>
+      </div>
+    </div>
+  );
+
   const renderPatientsList = () => {
     if (loadingPatients) return renderPatientsListSkeleton();
-    if (!patientsList || patientsList.length === 0) return null;
+    if (!patientsList || patientsList.length === 0) return renderPatientsListEmpty();
 
     // Group patients and count days
     const patients = {};
@@ -314,7 +338,7 @@ function PatientHistory({
     if (loadingHistory) return renderHistoryTableSkeleton();
     if (!patientHistory || patientHistory.length === 0) return null;
 
-    const patientID = patientHistory[0]?.patient;
+    const patientID = currentPatient?.patient_id ?? patientHistory[0]?.patient;
     const days = [];
     const kcal = [];
     const protein = [];

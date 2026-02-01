@@ -82,6 +82,7 @@ export const translations = {
         "Kumulatívny rozdiel bielkovín (vs. dolný cieľ)",
       cumulativeProteinDiffMax:
         "Kumulatívny rozdiel bielkovín (vs. horný cieľ)",
+      listEmpty: "Zoznam je prázdny",
     },
 
     // Preparations
@@ -290,6 +291,7 @@ export const translations = {
         "Cumulative protein difference (vs. lower goal)",
       cumulativeProteinDiffMax:
         "Cumulative protein difference (vs. upper goal)",
+      listEmpty: "The list is empty",
     },
 
     // Preparations

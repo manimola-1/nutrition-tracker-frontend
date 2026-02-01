@@ -93,6 +93,32 @@ function PatientForm({
     });
   };
 
+  const handleProteinGoalMinChange = (value) => {
+    const num = safeParseFloat(value, 1.5);
+    const max = safeParseFloat(patientData.protein_goal_max, 1.5);
+    const newMin = num;
+    const newMax = newMin > max ? newMin : max;
+    onPatientDataChange({
+      ...patientData,
+      protein_goal_min: newMin,
+      protein_goal_max: newMax,
+      selected_protein_preset: "",
+    });
+  };
+
+  const handleProteinGoalMaxChange = (value) => {
+    const num = safeParseFloat(value, 1.5);
+    const min = safeParseFloat(patientData.protein_goal_min, 1.5);
+    const newMax = num;
+    const newMin = newMax < min ? newMax : min;
+    onPatientDataChange({
+      ...patientData,
+      protein_goal_min: newMin,
+      protein_goal_max: newMax,
+      selected_protein_preset: "",
+    });
+  };
+
   const genderOptions = [
     { value: "M", label: "Muž" },
     { value: "F", label: "Žena" },
@@ -366,14 +392,11 @@ function PatientForm({
                   <input
                     type="number"
                     value={patientData.protein_goal_min ?? 1.5}
-                    onChange={(e) => {
-                      handleChange(
-                        "protein_goal_min",
-                        safeParseFloat(e.target.value, 1.5),
-                      );
-                      handleChange("selected_protein_preset", "");
-                    }}
+                    onChange={(e) =>
+                      handleProteinGoalMinChange(e.target.value)
+                    }
                     min="0"
+                    max={patientData.protein_goal_max ?? 1.5}
                     step="0.1"
                     className="w-16 min-w-0 px-2 py-2 text-center bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 font-medium transition-all duration-200 hover:border-emerald-400 dark:hover:border-emerald-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   />
@@ -383,14 +406,10 @@ function PatientForm({
                   <input
                     type="number"
                     value={patientData.protein_goal_max ?? 1.5}
-                    onChange={(e) => {
-                      handleChange(
-                        "protein_goal_max",
-                        safeParseFloat(e.target.value, 1.5),
-                      );
-                      handleChange("selected_protein_preset", "");
-                    }}
-                    min="0"
+                    onChange={(e) =>
+                      handleProteinGoalMaxChange(e.target.value)
+                    }
+                    min={patientData.protein_goal_min ?? 1.5}
                     step="0.1"
                     className="w-16 min-w-0 px-2 py-2 text-center bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-gray-100 font-medium transition-all duration-200 hover:border-emerald-400 dark:hover:border-emerald-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   />
@@ -487,35 +506,9 @@ function PatientForm({
                   Vypočítané hodnoty
                 </h4>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {/* IBW */}
-                <div className="group bg-white dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-emerald-500 hover:shadow-lg transition-all duration-300 hover:translate-x-1">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
-                    Ideálna váha (IBW)
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {patientData.calculations?.ibw || "0"}
-                    <span className="text-base sm:text-lg text-gray-500 dark:text-gray-400 font-medium ml-2">
-                      kg
-                    </span>
-                  </p>
-                </div>
-
-                {/* ABW */}
-                <div className="group bg-white dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-teal-500 hover:shadow-lg transition-all duration-300 hover:translate-x-1">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
-                    Adjusted Body Weight (ABW)
-                  </p>
-                  <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                    {patientData.calculations?.abw || "0"}
-                    <span className="text-base sm:text-lg text-gray-500 dark:text-gray-400 font-medium ml-2">
-                      kg
-                    </span>
-                  </p>
-                </div>
-
-                {/* BMI */}
-                <div className="group bg-white dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-cyan-500 hover:shadow-lg transition-all duration-300 hover:translate-x-1">
+              <div className="space-y-3">
+                {/* BMI – main calculated value */}
+                <div className="group bg-white dark:bg-gray-800/50 rounded-xl p-4 border-l-4 border-cyan-500 hover:shadow-lg transition-all duration-300 hover:translate-x-1 max-w-xs">
                   <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">
                     Body Mass Index
                   </p>
@@ -523,6 +516,12 @@ function PatientForm({
                     {patientData.calculations?.bmi || "0"}
                   </p>
                 </div>
+                {/* IBW & ABW – smaller info, like helper under first section */}
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  Ideálna váha (IBW): {patientData.calculations?.ibw || "0"} kg
+                  <span className="mx-2">·</span>
+                  Adjusted Body Weight (ABW): {patientData.calculations?.abw || "0"} kg
+                </p>
               </div>
             </div>
           </div>

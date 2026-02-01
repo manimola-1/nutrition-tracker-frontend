@@ -229,9 +229,7 @@ function NutritionTracker() {
         }
         const autoSpeed = calculateAutoSpeed(autoType, remaining, perMl, hours);
         const speedStr =
-          autoSpeed > 0
-            ? autoSpeed.toFixed(6).replace(/0+$/, "").replace(/\.$/, "")
-            : "";
+          autoSpeed > 0 ? formatNum(autoSpeed, 1) : "";
 
         const ml = autoSpeed * hours;
         updatedPreparations[autoRowIndex] = {
@@ -630,7 +628,7 @@ function NutritionTracker() {
   };
 
   const handleSavePatient = async () => {
-    if (!patientData.patient_id) {
+    if (!patientData?.patient_id) {
       setError(t("messages.enterPatientId"));
       return;
     }
@@ -648,20 +646,26 @@ function NutritionTracker() {
         ? existingPatients
         : [];
 
-        const existingPatient = patientsArray.find(
-        (p) => p.patient_id === patientData.patient_id
-        );
+      const existingPatient = (patientsArray || []).find(
+        (p) => p && String(p.patient_id) === String(patientData.patient_id),
+      );
 
       if (existingPatient) {
         patient = existingPatient;
       } else {
         // Create new patient
-        patient = await patientsAPI.create({
+        const created = await patientsAPI.create({
           patient_id: patientData.patient_id,
-          height: patientData.height || "",
-          weight: patientData.weight || "",
+          height: patientData.height ?? "",
+          weight: patientData.weight ?? "",
           gender: patientData.gender || "M",
         });
+        patient = created;
+      }
+
+      if (!patient || patient.id == null) {
+        setError("Chyba: neplatná odpoveď servera (chýba ID pacienta).");
+        return;
       }
 
       // Check if day exists
@@ -670,10 +674,9 @@ function NutritionTracker() {
         dayRecord = await patientsAPI.getDay(patient.id, patientData.day);
       } catch (err) {
         // Day doesn't exist (404) or other error - will create new one
-        if (err.response?.status === 404) {
+        if (err?.response?.status === 404) {
           dayRecord = null;
         } else {
-          // Re-throw non-404 errors
           throw err;
         }
       }
@@ -701,10 +704,11 @@ function NutritionTracker() {
         setLoadingSave(true);
       }
 
-      // Prepare day data
+      // Prepare day data (defensive: avoid null/undefined from state)
+      const preps = Array.isArray(preparations) ? preparations : [];
       const dayData = {
         patient: patient.id,
-        day: parseInt(patientData.day) || 1,
+        day: parseInt(patientData.day, 10) || 1,
         height:
           patientData.height != null && patientData.height !== ""
             ? safeParseFloat(patientData.height, 0)
@@ -714,48 +718,54 @@ function NutritionTracker() {
             ? safeParseFloat(patientData.weight, 0)
             : null,
         calorimeter: patientData.calorimeter || "NIE",
-        ree: patientData.ree ? safeParseFloat(patientData.ree, 0) : null,
+        ree: patientData.ree != null && patientData.ree !== "" ? safeParseFloat(patientData.ree, 0) : null,
         protein_goal_min: safeParseFloat(patientData.protein_goal_min, 1.5),
         protein_goal_max: safeParseFloat(patientData.protein_goal_max, 1.5),
-        fluid_limit: patientData.fluid_limit
+        fluid_limit: patientData.fluid_limit != null && patientData.fluid_limit !== ""
           ? safeParseFloat(patientData.fluid_limit, 0)
           : null,
-        calculations: calculations || {},
-        preparations: preparations
+        calculations: calculations && typeof calculations === "object" ? calculations : {},
+        preparations: preps
           .filter((p) => p && p.name)
           .map((p, index) => ({
-            name: p.name,
-            auto_kcal: p.autoKcal || false,
-            auto_protein: p.autoProtein || false,
+            name: p.name || "",
+            auto_kcal: Boolean(p.autoKcal),
+            auto_protein: Boolean(p.autoProtein),
             speed:
               p.speed != null && p.speed !== ""
                 ? safeParseFloat(p.speed, 0)
                 : null,
             hours: safeParseFloat(p.hours, 24),
             order: index,
-            calculations: p.calculations || {},
+            calculations: p.calculations && typeof p.calculations === "object" ? p.calculations : {},
           })),
       };
 
-      if (dayRecord) {
-        // Update existing day
+      if (dayRecord && dayRecord.id != null) {
         await patientDaysAPI.update(dayRecord.id, dayData);
-        setSuccess("Záznam úspešne aktualizovaný.");
+        setSuccess(t("messages.updateSuccess"));
       } else {
-        // Create new day
         await patientDaysAPI.create(dayData);
         setSuccess(t("messages.saveSuccess"));
       }
 
       setCurrentPatient(patient);
-      setLoadingSave(false);
     } catch (err) {
       console.error("Failed to save:", err);
-      const errorMsg =
-        err.response?.data?.detail ||
-        Object.values(err.response?.data || {})[0]?.[0] ||
-        "Chyba pri ukladaní záznamu";
+      let errorMsg = "Chyba pri ukladaní záznamu";
+      if (err?.response?.data != null) {
+        const data = err.response.data;
+        if (typeof data === "string") {
+          errorMsg = data;
+        } else if (typeof data.detail === "string") {
+          errorMsg = data.detail;
+        } else if (typeof data === "object") {
+          const firstVal = Object.values(data)[0];
+          errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal ?? errorMsg);
+        }
+      }
       setError(errorMsg);
+    } finally {
       setLoadingSave(false);
     }
   };
@@ -947,6 +957,7 @@ function NutritionTracker() {
         <PatientHistory
           patientsList={filteredPatientsList}
           patientHistory={patientHistory}
+          currentPatient={currentPatient}
           loadingPatients={loadingPatients}
           loadingHistory={loadingHistory}
           searchQuery={searchQuery}

@@ -20,11 +20,12 @@ function GoalFulfillment({ calculations }) {
     };
 
     const kcalStatus = calculations?.diff_kcal_class ?? 'optimal';
-    const proteinStatus = calculations?.diff_protein_class ?? 'optimal';
     const diffMinNum = safeParseFloat(calculations?.diff_protein_min, 0);
     const diffMaxNum = safeParseFloat(calculations?.diff_protein_max, 0);
-    const proteinMinStatus = diffMinNum < 0 ? 'deficit' : proteinStatus;
-    const proteinMaxStatus = diffMaxNum > 0 ? 'excess' : 'optimal';
+    // Below min (diffMin < 0) → both red. In range (diffMin >= 0 && diffMax <= 0) → both green. Both diffs positive (above max) → both orange
+    const inRange = diffMinNum >= 0 && diffMaxNum <= 0;
+    const proteinMinStatus = diffMinNum < 0 ? 'deficit' : inRange ? 'optimal' : 'excess';
+    const proteinMaxStatus = diffMinNum < 0 ? 'deficit' : inRange ? 'optimal' : 'excess';
 
     const kcalStyles = getCardStyles(kcalStatus);
     const proteinMinStyles = getCardStyles(proteinMinStatus);
