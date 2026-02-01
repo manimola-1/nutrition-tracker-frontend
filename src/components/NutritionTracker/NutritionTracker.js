@@ -35,7 +35,7 @@ function NutritionTracker() {
   const { t, language } = useLanguage();
   // eslint-disable-next-line no-unused-vars
   const [isDarkMode, setIsDarkMode] = useState(
-    localStorage.getItem("darkMode") === "enabled",
+    localStorage.getItem("darkMode") === "enabled"
   );
   const [patientData, setPatientData] = useState({
     patient_id: "",
@@ -56,6 +56,7 @@ function NutritionTracker() {
   const confirmResolveRef = useRef(null);
   const [calculations, setCalculations] = useState({});
   const [isFluidLimitManual, setIsFluidLimitManual] = useState(false);
+  const [showPatientList, setShowPatientList] = useState(false);
   const [patientsList, setPatientsList] = useState([]);
   const [patientHistory, setPatientHistory] = useState([]);
   // eslint-disable-next-line no-unused-vars
@@ -228,8 +229,7 @@ function NutritionTracker() {
           perMl = product.bielk;
         }
         const autoSpeed = calculateAutoSpeed(autoType, remaining, perMl, hours);
-        const speedStr =
-          autoSpeed > 0 ? formatNum(autoSpeed, 1) : "";
+        const speedStr = autoSpeed > 0 ? formatNum(autoSpeed, 1) : "";
 
         const ml = autoSpeed * hours;
         updatedPreparations[autoRowIndex] = {
@@ -305,7 +305,7 @@ function NutritionTracker() {
       totalProtein,
       goalProtein.min,
       goalProtein.max,
-      epsilon,
+      epsilon
     );
 
     let formattedDiffKcal = formatNum(diffKcal, 1);
@@ -341,7 +341,10 @@ function NutritionTracker() {
       full_goal_kcal: formatNum(fullGoalKcal, 1),
       rec_goal_kcal: formatNum(recGoalKcal, 1),
       ramp_percent: rampPercent,
-      goal_protein: `${formatNum(goalProtein.min, 1)} - ${formatNum(goalProtein.max, 1)}`, // grams (min - max)
+      goal_protein: `${formatNum(goalProtein.min, 1)} - ${formatNum(
+        goalProtein.max,
+        1
+      )}`, // grams (min - max)
       total_ml: formatNum(totalMl, 1),
       total_kcal: formatNum(totalKcal, 1),
       total_protein: formatNum(totalProtein, 1),
@@ -446,17 +449,22 @@ function NutritionTracker() {
   };
 
   const handleListPatients = async () => {
+    if (showPatientList) {
+      setShowPatientList(false);
+      return;
+    }
+    setShowPatientList(true);
     setLoadingPatients(true);
     setError(null);
     try {
       const response = await patientsAPI.getAll();
       setPatientsList(response.results || response);
-      setLoadingPatients(false);
     } catch (err) {
       console.error("Failed to list patients:", err);
       setError(
-        err.response?.data?.detail || t("messages.errorLoadingPatients"),
+        err.response?.data?.detail || t("messages.errorLoadingPatients")
       );
+    } finally {
       setLoadingPatients(false);
     }
   };
@@ -466,7 +474,7 @@ function NutritionTracker() {
     setError(null);
     try {
       const patient = patientsList.find(
-        (p) => p.patient_id === patientId || p.id === patientId,
+        (p) => p.patient_id === patientId || p.id === patientId
       );
       if (!patient) {
         setError(t("messages.patientNotFound"));
@@ -491,7 +499,7 @@ function NutritionTracker() {
     setError(null);
     try {
       const patient = patientsList.find(
-        (p) => p.patient_id === patientID || p.id === patientID,
+        (p) => p.patient_id === patientID || p.id === patientID
       );
       if (!patient) {
         setError(t("messages.patientNotFound"));
@@ -509,11 +517,11 @@ function NutritionTracker() {
           height:
             dayData.height != null && dayData.height !== ""
               ? safeParseFloat(dayData.height, 0)
-              : (patientFull.height ?? ""),
+              : patientFull.height ?? "",
           weight:
             dayData.weight != null && dayData.weight !== ""
               ? safeParseFloat(dayData.weight, 0)
-              : (patientFull.weight ?? ""),
+              : patientFull.weight ?? "",
           gender: patientFull.gender || "M",
           day: dayData.day,
           calorimeter: dayData.calorimeter || "NIE",
@@ -525,7 +533,7 @@ function NutritionTracker() {
             : "",
         });
         setIsFluidLimitManual(
-          dayData.fluid_limit !== null && dayData.fluid_limit !== "",
+          dayData.fluid_limit !== null && dayData.fluid_limit !== ""
         );
 
         const preps = dayData.preparations || [];
@@ -544,7 +552,7 @@ function NutritionTracker() {
               fat: "0",
               carb: "0",
             },
-          })),
+          }))
         );
 
         if (dayData.calculations) {
@@ -562,7 +570,7 @@ function NutritionTracker() {
       setError(
         err.response?.data?.detail ||
           err.response?.data?.error ||
-          t("messages.errorLoading"),
+          t("messages.errorLoading")
       );
       setLoadingHistory(false);
     }
@@ -575,7 +583,7 @@ function NutritionTracker() {
     setError(null);
     try {
       const patient = patientsList.find(
-        (p) => p.patient_id === patientID || p.id === patientID,
+        (p) => p.patient_id === patientID || p.id === patientID
       );
       if (!patient) {
         setError(t("messages.patientNotFound"));
@@ -601,7 +609,7 @@ function NutritionTracker() {
     setError(null);
     try {
       const patient = patientsList.find(
-        (p) => p.patient_id === patientID || p.id === patientID,
+        (p) => p.patient_id === patientID || p.id === patientID
       );
       if (!patient) {
         setError(t("messages.patientNotFound"));
@@ -647,7 +655,7 @@ function NutritionTracker() {
         : [];
 
       const existingPatient = (patientsArray || []).find(
-        (p) => p && String(p.patient_id) === String(patientData.patient_id),
+        (p) => p && String(p.patient_id) === String(patientData.patient_id)
       );
 
       if (existingPatient) {
@@ -718,13 +726,18 @@ function NutritionTracker() {
             ? safeParseFloat(patientData.weight, 0)
             : null,
         calorimeter: patientData.calorimeter || "NIE",
-        ree: patientData.ree != null && patientData.ree !== "" ? safeParseFloat(patientData.ree, 0) : null,
+        ree:
+          patientData.ree != null && patientData.ree !== ""
+            ? safeParseFloat(patientData.ree, 0)
+            : null,
         protein_goal_min: safeParseFloat(patientData.protein_goal_min, 1.5),
         protein_goal_max: safeParseFloat(patientData.protein_goal_max, 1.5),
-        fluid_limit: patientData.fluid_limit != null && patientData.fluid_limit !== ""
-          ? safeParseFloat(patientData.fluid_limit, 0)
-          : null,
-        calculations: calculations && typeof calculations === "object" ? calculations : {},
+        fluid_limit:
+          patientData.fluid_limit != null && patientData.fluid_limit !== ""
+            ? safeParseFloat(patientData.fluid_limit, 0)
+            : null,
+        calculations:
+          calculations && typeof calculations === "object" ? calculations : {},
         preparations: preps
           .filter((p) => p && p.name)
           .map((p, index) => ({
@@ -737,7 +750,10 @@ function NutritionTracker() {
                 : null,
             hours: safeParseFloat(p.hours, 24),
             order: index,
-            calculations: p.calculations && typeof p.calculations === "object" ? p.calculations : {},
+            calculations:
+              p.calculations && typeof p.calculations === "object"
+                ? p.calculations
+                : {},
           })),
       };
 
@@ -761,7 +777,9 @@ function NutritionTracker() {
           errorMsg = data.detail;
         } else if (typeof data === "object") {
           const firstVal = Object.values(data)[0];
-          errorMsg = Array.isArray(firstVal) ? firstVal[0] : String(firstVal ?? errorMsg);
+          errorMsg = Array.isArray(firstVal)
+            ? firstVal[0]
+            : String(firstVal ?? errorMsg);
         }
       }
       setError(errorMsg);
@@ -783,13 +801,13 @@ function NutritionTracker() {
         calculations,
         preparations,
         patientHistory,
-        language,
+        language
       );
       setSuccess(t("messages.exportPdfSuccess"));
     } catch (err) {
       console.error("Failed to export PDF:", err);
       setError(
-        t("messages.errorExporting") + ": " + (err.message || "Unknown error"),
+        t("messages.errorExporting") + ": " + (err.message || "Unknown error")
       );
     }
   };
@@ -801,7 +819,7 @@ function NutritionTracker() {
         calculations,
         preparations,
         patientHistory,
-        language,
+        language
       );
       setSuccess(t("messages.exportCsvSuccess"));
     } catch (err) {
@@ -954,19 +972,21 @@ function NutritionTracker() {
             <span>Zobraziť zoznam pacientov</span>
           </button>
         </div>
-        <PatientHistory
-          patientsList={filteredPatientsList}
-          patientHistory={patientHistory}
-          currentPatient={currentPatient}
-          loadingPatients={loadingPatients}
-          loadingHistory={loadingHistory}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          onShowHistory={handleShowHistory}
-          onLoadDay={handleLoadDay}
-          onDeletePatient={handleDeletePatient}
-          onDeleteDay={handleDeleteDay}
-        />
+        {showPatientList && (
+          <PatientHistory
+            patientsList={filteredPatientsList}
+            patientHistory={patientHistory}
+            currentPatient={currentPatient}
+            loadingPatients={loadingPatients}
+            loadingHistory={loadingHistory}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onShowHistory={handleShowHistory}
+            onLoadDay={handleLoadDay}
+            onDeletePatient={handleDeletePatient}
+            onDeleteDay={handleDeleteDay}
+          />
+        )}
 
         <PatientForm
           patientData={{

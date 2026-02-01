@@ -145,56 +145,59 @@ function PatientHistory({
     </div>
   );
 
-  const renderPatientsListEmpty = () => (
-    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-200/50 dark:border-gray-700/50 shadow-2xl p-5 sm:p-6 mb-6 sm:mb-8">
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-3">
-          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="tracking-wide">ZOZNAM PACIENTOV</span>
-        </div>
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-          História pacientov
-        </h2>
-      </div>
-      <div className="py-12 text-center">
-        <p className="text-lg text-gray-600 dark:text-gray-400 font-medium">
-          {t("patientHistory.listEmpty", "Zoznam je prázdny")}
-        </p>
-      </div>
-    </div>
-  );
-
   const renderPatientsList = () => {
-    if (loadingPatients) return renderPatientsListSkeleton();
-    if (!patientsList || patientsList.length === 0) return renderPatientsListEmpty();
+    // When refreshing and we already have data, show skeleton
+    if (loadingPatients && patientsList && patientsList.length > 0) {
+      return renderPatientsListSkeleton();
+    }
 
-    // Group patients and count days
+    // Group patients (may be empty)
     const patients = {};
-    patientsList.forEach((patient) => {
-      const patientId = patient.patient_id || patient.id;
-      if (!patients[patientId]) {
-        patients[patientId] = {
-          id: patient.id,
-          patient_id: patient.patient_id,
-          days_count: patient.days_count || 0,
-          last_day: patient.last_day || 0,
-          created_at: patient.created_at,
-        };
-      }
-    });
+    if (patientsList && patientsList.length > 0) {
+      patientsList.forEach((patient) => {
+        const patientId = patient.patient_id || patient.id;
+        if (!patients[patientId]) {
+          patients[patientId] = {
+            id: patient.id,
+            patient_id: patient.patient_id,
+            days_count: patient.days_count || 0,
+            last_day: patient.last_day || 0,
+            created_at: patient.created_at,
+          };
+        }
+      });
+    }
+
+    const isEmpty = !patientsList || patientsList.length === 0;
 
     return (
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-200/50 dark:border-gray-700/50 shadow-2xl p-5 sm:p-6 mb-6 sm:mb-8">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-3">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path
+                d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             <span className="tracking-wide">ZOZNAM PACIENTOV</span>
           </div>
@@ -272,61 +275,72 @@ function PatientHistory({
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800/50">
-              {Object.entries(patients).map(([id, info]) => (
-                <tr key={id} className={tableRowHover}>
+              {isEmpty ? (
+                <tr>
                   <td
-                    className={`${tableCellClass} font-medium text-gray-900 dark:text-gray-100`}
+                    colSpan={4}
+                    className="p-8 text-center text-lg text-gray-600 dark:text-gray-400 font-medium"
                   >
-                    {info.patient_id}
-                  </td>
-                  <td className={tableCellClass}>{info.last_day}</td>
-                  <td className={tableCellClass}>{info.days_count}</td>
-                  <td className={tableCellClass}>
-                    <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                      <button
-                        type="button"
-                        className="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-xl font-semibold shadow-sm hover:shadow text-[10px] sm:text-xs md:text-sm transition-all duration-200 whitespace-nowrap"
-                        onClick={() => onShowHistory(info.patient_id)}
-                      >
-                        <svg
-                          className="w-4 h-4 flex-shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        {t("patientHistory.showHistory")}
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-xl font-semibold shadow-sm hover:shadow text-[10px] sm:text-xs md:text-sm transition-all duration-200 whitespace-nowrap"
-                        onClick={() => onDeletePatient(info.patient_id)}
-                      >
-                        <svg
-                          className="w-4 h-4 flex-shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
-                        {t("patientHistory.deletePatient")}
-                      </button>
-                    </div>
+                    {t("patientHistory.listEmpty", "Zoznam je prázdny")}
                   </td>
                 </tr>
-              ))}
+              ) : (
+                Object.entries(patients).map(([id, info]) => (
+                  <tr key={id} className={tableRowHover}>
+                    <td
+                      className={`${tableCellClass} font-medium text-gray-900 dark:text-gray-100`}
+                    >
+                      {info.patient_id}
+                    </td>
+                    <td className={tableCellClass}>{info.last_day}</td>
+                    <td className={tableCellClass}>{info.days_count}</td>
+                    <td className={tableCellClass}>
+                      <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-xl font-semibold shadow-sm hover:shadow text-[10px] sm:text-xs md:text-sm transition-all duration-200 whitespace-nowrap"
+                          onClick={() => onShowHistory(info.patient_id)}
+                        >
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          {t("patientHistory.showHistory")}
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-xl font-semibold shadow-sm hover:shadow text-[10px] sm:text-xs md:text-sm transition-all duration-200 whitespace-nowrap"
+                          onClick={() => onDeletePatient(info.patient_id)}
+                        >
+                          <svg
+                            className="w-4 h-4 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                          {t("patientHistory.deletePatient")}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -479,9 +493,23 @@ function PatientHistory({
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border-2 border-gray-200/50 dark:border-gray-700/50 shadow-2xl p-5 sm:p-6 mb-6 sm:mb-8">
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800 px-4 py-1.5 rounded-full text-xs font-semibold mb-3">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <path
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
             <span className="tracking-wide">HISTÓRIA DŇOV</span>
           </div>
