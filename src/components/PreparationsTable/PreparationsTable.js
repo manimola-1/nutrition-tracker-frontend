@@ -23,7 +23,8 @@ function PreparationsTable({
             ...prep,
             autoKcal: willBeChecked,
             autoProtein: false,
-            // Reset speed to 0 when checkbox is checked
+            // Reset speed to 0 only when checking (will be recalculated)
+            // When unchecking, preserve the calculated speed value
             speed: willBeChecked ? 0 : prep.speed,
           };
         } else {
@@ -31,13 +32,15 @@ function PreparationsTable({
             ...prep,
             autoKcal: false,
             autoProtein: willBeChecked,
-            // Reset speed to 0 when checkbox is checked
+            // Reset speed to 0 only when checking (will be recalculated)
+            // When unchecking, preserve the calculated speed value
             speed: willBeChecked ? 0 : prep.speed,
           };
         }
       } else {
-        // For all other rows: uncheck both checkboxes
-        return { ...prep, autoKcal: false, autoProtein: false };
+        // For all other rows: keep their current state (allow multiple auto rows)
+        // Only uncheck the opposite type on the same row if needed
+        return prep;
       }
     });
     onPreparationChange(newPreparations);
@@ -127,10 +130,18 @@ function PreparationsTable({
                 {preparations.map((prep, index) => (
                   <tr
                     key={index}
-                    className={`group ${prep.autoKcal || prep.autoProtein ? "bg-green-50 dark:bg-gray-700" : ""} hover:bg-blue-50 dark:hover:bg-gray-700`}
+                    className={`group ${
+                      prep.autoKcal || prep.autoProtein
+                        ? "bg-green-50 dark:bg-gray-700"
+                        : ""
+                    } hover:bg-blue-50 dark:hover:bg-gray-700`}
                   >
                     <td
-                      className={`p-1 sm:p-1.5 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 min-w-[160px] sm:min-w-[180px] md:min-w-0 md:sticky md:left-0 md:z-20 md:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] md:dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)] break-words group-hover:bg-blue-50 dark:group-hover:bg-gray-700 ${prep.autoKcal || prep.autoProtein ? "bg-green-50 dark:bg-gray-700" : "bg-white dark:bg-gray-800"}`}
+                      className={`p-1 sm:p-1.5 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 min-w-[160px] sm:min-w-[180px] md:min-w-0 md:sticky md:left-0 md:z-20 md:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.08)] md:dark:shadow-[2px_0_4px_-2px_rgba(0,0,0,0.3)] break-words group-hover:bg-blue-50 dark:group-hover:bg-gray-700 ${
+                        prep.autoKcal || prep.autoProtein
+                          ? "bg-green-50 dark:bg-gray-700"
+                          : "bg-white dark:bg-gray-800"
+                      }`}
                     >
                       <ProductDropdown
                         value={prep.name || ""}
@@ -172,11 +183,15 @@ function PreparationsTable({
                           handleFieldChange(
                             index,
                             "speed",
-                            safeParseFloat(e.target.value, 0),
+                            safeParseFloat(e.target.value, 0)
                           );
                         }}
                         disabled={prep.autoKcal || prep.autoProtein}
-                        className={`w-full min-w-0 p-1.5 sm:p-2 md:p-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-[10px] sm:text-xs md:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 ${prep.autoKcal || prep.autoProtein ? "bg-green-50 dark:bg-gray-700 font-bold cursor-not-allowed opacity-60" : "focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"}`}
+                        className={`w-full min-w-0 p-1.5 sm:p-2 md:p-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-[10px] sm:text-xs md:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-all duration-200 ${
+                          prep.autoKcal || prep.autoProtein
+                            ? "bg-green-50 dark:bg-gray-700 font-bold cursor-not-allowed opacity-60"
+                            : "focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                        }`}
                       />
                     </td>
                     <td className="p-1 sm:p-1.5 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 min-w-[75px] md:min-w-0 break-words">
@@ -190,7 +205,7 @@ function PreparationsTable({
                           handleFieldChange(
                             index,
                             "hours",
-                            parseInt(e.target.value),
+                            parseInt(e.target.value)
                           )
                         }
                         className="w-full min-w-0 p-1.5 sm:p-2 md:p-2.5 border-2 border-gray-300 dark:border-gray-600 rounded-lg text-[10px] sm:text-xs md:text-base bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
@@ -236,19 +251,25 @@ function PreparationsTable({
                   </td>
                   <td
                     id="total_ml"
-                    className={`p-1.5 sm:p-2 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 text-[10px] sm:text-xs md:text-sm break-words ${getStatusClasses(totals?.mlClass || "")}`}
+                    className={`p-1.5 sm:p-2 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 text-[10px] sm:text-xs md:text-sm break-words ${getStatusClasses(
+                      totals?.mlClass || ""
+                    )}`}
                   >
                     {totals?.ml || "0"}
                   </td>
                   <td
                     id="total_kcal"
-                    className={`p-1.5 sm:p-2 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 text-[10px] sm:text-xs md:text-sm break-words ${getStatusClasses(totals?.kcalClass || "")}`}
+                    className={`p-1.5 sm:p-2 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 text-[10px] sm:text-xs md:text-sm break-words ${getStatusClasses(
+                      totals?.kcalClass || ""
+                    )}`}
                   >
                     {totals?.kcal || "0"}
                   </td>
                   <td
                     id="total_protein"
-                    className={`p-1.5 sm:p-2 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 text-[10px] sm:text-xs md:text-sm break-words ${getStatusClasses(totals?.proteinClass || "")}`}
+                    className={`p-1.5 sm:p-2 md:p-2.5 text-center border-b border-gray-200 dark:border-gray-600 text-[10px] sm:text-xs md:text-sm break-words ${getStatusClasses(
+                      totals?.proteinClass || ""
+                    )}`}
                   >
                     {totals?.protein || "0"}
                   </td>

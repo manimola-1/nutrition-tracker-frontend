@@ -162,21 +162,19 @@ function NutritionTracker() {
     const fullGoalKcal = calculateFullGoalKcal(abw, hasCal, ree);
     const rampPercent = calculateRampPercent(day, hasCal);
     const recGoalKcal = fullGoalKcal * (rampPercent / 100);
+
     // Protein goal in grams: min = proteinMinKg × ABW, max = proteinMaxKg × ABW
     const goalProtein = calculateGoalProtein(proteinMinKg, proteinMaxKg, abw);
 
     const currentPreparations = preparationsRef.current;
 
     // --- 4. Find which row is “auto” (kcal or protein) ---
-    let autoType = null;
-    let autoRowIndex = null;
+    const autoRows = [];
     currentPreparations.forEach((prep, index) => {
       if (prep.autoKcal) {
-        autoType = "kcal";
-        autoRowIndex = index;
+        autoRows.push({ index, type: "kcal" });
       } else if (prep.autoProtein) {
-        autoType = "protein";
-        autoRowIndex = index;
+        autoRows.push({ index, type: "protein" });
       }
     });
 
@@ -184,7 +182,9 @@ function NutritionTracker() {
     let fixedKcal = 0;
     let fixedProtein = 0;
     const updatedPreparations = currentPreparations.map((prep, index) => {
-      if (index === autoRowIndex) {
+      // Skip auto rows for now - will calculate them separately
+      const isAutoRow = autoRows.some((ar) => ar.index === index);
+      if (isAutoRow) {
         return prep; // Will update auto row separately
       }
       const product = nutritionProducts.find((p) => p.name === prep.name);
@@ -213,38 +213,63 @@ function NutritionTracker() {
       };
     });
 
-    // --- 6. Auto speed: fill remaining kcal or protein with the marked row ---
-    if (autoRowIndex !== null && autoRowIndex < updatedPreparations.length) {
-      const autoPrep = updatedPreparations[autoRowIndex];
-      const product = nutritionProducts.find((p) => p.name === autoPrep.name);
-      if (product) {
-        const hours = safeParseFloat(autoPrep.hours, 24);
-        let remaining = 0;
-        let perMl = 0;
-        if (autoType === "kcal" && product.kcal > 0) {
-          remaining = recGoalKcal - fixedKcal;
-          perMl = product.kcal;
-        } else if (autoType === "protein" && product.bielk > 0) {
-          remaining = goalProtein.max - fixedProtein; // target upper protein goal
-          perMl = product.bielk;
-        }
-        const autoSpeed = calculateAutoSpeed(autoType, remaining, perMl, hours);
-        const speedStr = autoSpeed > 0 ? formatNum(autoSpeed, 1) : "";
+    // --- 6. Auto speed: calculate for each auto row independently ---
+    // Each row calculates independently to reach the full remaining goal
+    // (doesn't consider other auto rows - each is a separate calculation)
+    let remainingKcal = recGoalKcal - fixedKcal;
+    let remainingProtein = goalProtein.max - fixedProtein;
 
-        const ml = autoSpeed * hours;
-        updatedPreparations[autoRowIndex] = {
-          ...autoPrep,
-          speed: speedStr,
-          calculations: {
-            ml: formatNum(ml, 1),
-            kcal: formatNum(ml * product.kcal, 1),
-            protein: formatNum(ml * product.bielk, 1),
-            fat: formatNum(ml * product.tuk, 1),
-            carb: formatNum(ml * product.cukry, 1),
-          },
-        };
+    // Process each auto row independently
+    autoRows.forEach((autoRow) => {
+      const { index: autoRowIndex, type: autoType } = autoRow;
+      if (autoRowIndex < updatedPreparations.length) {
+        const autoPrep = updatedPreparations[autoRowIndex];
+        const product = nutritionProducts.find((p) => p.name === autoPrep.name);
+        if (product) {
+          const hours = safeParseFloat(autoPrep.hours, 24);
+          let remaining = 0;
+          let perMl = 0;
+          console.log(
+            autoType,
+            product.kcal,
+            product.bielk,
+            "autoType, product.kcal, product.bielk"
+          );
+          if (autoType === "kcal" && product.kcal > 0) {
+            remaining = remainingKcal;
+            perMl = product.kcal;
+          } else if (autoType === "protein" && product.bielk > 0) {
+            remaining = remainingProtein;
+            perMl = product.bielk;
+          }
+
+          const autoSpeed = calculateAutoSpeed(
+            autoType,
+            remaining,
+            perMl,
+            hours
+          );
+          console.log(autoSpeed, "est");
+          // Always show the computed auto speed (including 0) so that
+          // the user can see that the auto protein/kcal calculation
+          // has actually run, even when no additional amount is needed.
+          const speedStr = formatNum(autoSpeed, 1);
+
+          const ml = autoSpeed * hours;
+          updatedPreparations[autoRowIndex] = {
+            ...autoPrep,
+            speed: speedStr,
+            calculations: {
+              ml: formatNum(ml, 1),
+              kcal: formatNum(ml * product.kcal, 1),
+              protein: formatNum(ml * product.bielk, 1),
+              fat: formatNum(ml * product.tuk, 1),
+              carb: formatNum(ml * product.cukry, 1),
+            },
+          };
+        }
       }
-    }
+    });
 
     // --- 7. Totals from all rows (ml, kcal, protein, fat, carb) ---
     let totalMl = 0,
@@ -494,6 +519,10 @@ function NutritionTracker() {
   const handleLoadDay = async (day, patientID) => {
     setLoadingHistory(true);
     setError(null);
+    // Hide patient list when loading a day
+    setShowPatientList(false);
+    // Clear patient history immediately so the table disappears when loading
+    setPatientHistory([]);
     try {
       const patient = patientsList.find(
         (p) => p.patient_id === patientID || p.id === patientID

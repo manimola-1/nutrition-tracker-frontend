@@ -64,6 +64,7 @@ export function calculateGoalProtein(proteinMinKg, proteinMaxKg, abw) {
 
 /** Infusion speed (ml/h) to reach remaining kcal or protein over given hours; perMl = kcal or protein per ml. */
 export function calculateAutoSpeed(autoType, remaining, perMl, hours) {
+  console.log(remaining, perMl, hours, "remaining, perMl, hours");
   if (hours <= 0 || perMl <= 0) return 0;
   if (remaining < 0) remaining = 0;
   const mlNeeded = remaining / perMl;
